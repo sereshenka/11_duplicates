@@ -17,10 +17,10 @@ def load_win_unicode_console():
 def read_arguments():
     file_path  = {}
     parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', help='Укажите путь к файлу ', nargs = '+')
-    file_pathes = parser.parse_args().folder
-    for file in file_pathes:
-        file_path += file
+    parser.add_argument('--folder', help='Укажите путь к файлу ', nargs = '?'#+)
+    file_path = parser.parse_args().folder
+##    for file in file_pathes:
+##        file_path += file
     print(file_path)
     return (existence_of_arguments(file_path, parser))
 
@@ -47,10 +47,10 @@ def create_duplicate_dictionary(folder):
                 path = os.path.join(directory, file_name)
                 size = os.path.getsize(path)
                 duplicates_dictionary[file_name,size].append(path)
-    except OSError:
-        duplicates_dictionary = None
-        print('Папки не существет2')
-    return (duplicates_dictionary)
+    if duplicates_dictionary == {}:
+        print('Фаилов в папке нет')
+    else:
+        return (duplicates_dictionary)
 
 
 def input_of_numbers():
@@ -103,5 +103,3 @@ if __name__ == '__main__':
                 numbers = input_of_numbers()
                 if numbers is not None:
                     delete_files(numbers,duplicates)
-            
-
