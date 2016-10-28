@@ -15,9 +15,13 @@ def load_win_unicode_console():
 
 
 def read_arguments():
+    file_path  = {}
     parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', help='Укажите путь к файлу ', nargs = '?')
-    file_path = parser.parse_args().folder
+    parser.add_argument('--folder', help='Укажите путь к файлу ', nargs = '+')
+    file_pathes = parser.parse_args().folder
+    for file in file_pathes:
+        file_path += file
+    print(file_path)
     return (existence_of_arguments(file_path, parser))
 
 
@@ -37,11 +41,15 @@ def find_duplicates(duplicates_dictionary):
 
 def create_duplicate_dictionary(folder):
     duplicates_dictionary = defaultdict(list)
-    for directory, sub_dirs, files in os.walk(folder):
-        for file_name in files:
-            path = os.path.join(directory, file_name)
-            size = os.path.getsize(path)
-            duplicates_dictionary[file_name,size].append(path)
+    try:
+        for directory, sub_dirs, files in os.walk(folder):
+            for file_name in files:
+                path = os.path.join(directory, file_name)
+                size = os.path.getsize(path)
+                duplicates_dictionary[file_name,size].append(path)
+    except OSError:
+        duplicates_dictionary = None
+        print('Папки не существет2')
     return (duplicates_dictionary)
 
 
@@ -73,15 +81,27 @@ def print_duplicates(duplicates):
     print('Следующие фаилы явлются дубликатами:')
     for duplicate in enumerate(duplicates):
         print(duplicate)
-    
+
+
+def existance_of_folder(folder):
+    if not os.path.exists(folder):
+        print ('Папки не существует')
+        return None
+    else:
+        return (folder)
 
 if __name__ == '__main__':
     load_win_unicode_console()
     folder = read_arguments()
     if folder is not None:
-        duplicates_dictionary = create_duplicate_dictionary(folder)
-        duplicates = find_duplicates(duplicates_dictionary)
-        print_duplicates(duplicates)
-        numbers = input_of_numbers()
-        if numbers is not None:
-            delete_files(numbers,duplicates)
+        exist_folder = existance_of_folder(folder)
+        if exist_folder is not None:
+            duplicates_dictionary = create_duplicate_dictionary(folder)
+            if duplicates_dictionary is not None:
+                duplicates = find_duplicates(duplicates_dictionary)
+                print_duplicates(duplicates)
+                numbers = input_of_numbers()
+                if numbers is not None:
+                    delete_files(numbers,duplicates)
+            
+
