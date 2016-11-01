@@ -15,66 +15,60 @@ def load_win_unicode_console():
 
 
 def read_arguments():
-    file_path  = {}
+    """
+    использую с join,чтобы программа работала при указании пути,в котором папка
+    может содержать в названии пробел.(C:\\Users\\New User\\file.format)
+    """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', help='Укажите путь к файлу ', nargs = '?'#+)
-    file_path = parser.parse_args().folder
-##    for file in file_pathes:
-##        file_path += file
-    print(file_path)
-    return (existence_of_arguments(file_path, parser))
-
-
-def existence_of_arguments(file_path, parser):
-    if not file_path:
-        parser.print_help()
-        return None
-    else:
-        return (file_path)   
-                            
-
-def find_duplicates(duplicates_dictionary):
-    duplicates_dictionary = list(filter(lambda x: len(x) > 1,duplicates_dictionary.values()))
-    duplicates = [duplicate for duplicates in duplicates_dictionary for duplicate in duplicates]
-    return (duplicates)
+    parser.add_argument('--folder', help='Укажите путь к папке ', nargs = '+')
+    arguments = parser.parse_args().folder
+    try :
+        file_path = ' '.join(arguments)
+    except TypeError:
+        return None, parser
+    return file_path, parser
 
 
 def create_duplicate_dictionary(folder):
     duplicates_dictionary = defaultdict(list)
-    try:
-        for directory, sub_dirs, files in os.walk(folder):
-            for file_name in files:
-                path = os.path.join(directory, file_name)
-                size = os.path.getsize(path)
-                duplicates_dictionary[file_name,size].append(path)
-    if duplicates_dictionary == {}:
-        print('Фаилов в папке нет')
-    else:
-        return (duplicates_dictionary)
+    for directory, sub_dirs, files in os.walk(folder):
+        for file_name in files:
+            path = os.path.join(directory, file_name)
+            size = os.path.getsize(path)
+            duplicates_dictionary[file_name,size].append(path)
+    return duplicates_dictionary
+
+                            
+def find_duplicates(duplicates_dictionary):
+    duplicates_dictionary = list(filter(lambda x: len(x) > 1,duplicates_dictionary.values()))
+    duplicates = [duplicate for duplicates in duplicates_dictionary for duplicate in duplicates]
+    return duplicates
 
 
 def input_of_numbers():
-    try:
-        numbers = input('Введите номера фаилов,чтобы удалить их.'
+    numbers = input('Введите номера фаилов(через запятую),чтобы удалить их.'
                     'Чтобы выйти сочетание клавиш(ctrl+c)\n').split(',')
-        for number in numbers:
-            int(number)
-    except ValueError:
-        numbers = None
-        print('Введены не числа\Не было введено ни одного числа')
-    except KeyboardInterrupt:
-        numbers = None
-    return (numbers)
-
-
-def delete_files(numbers,duplicates):
     for number in numbers:
-        try:
-            os.remove(duplicates[int(number)])
-            print ('Удаление фаила прошло успешно', duplicates[int(number)])
-        except OSError:
+        int(number)
+    return numbers
+   
+
+def print_delete_information(numbers,duplicates):
+    for number in numbers:
+        remove = delete_files(number,duplicates)
+        if remove is None:
             print('Ошибка в удалении файла(возможно его ' \
-                  'не существует)', duplicates[int(number)])
+                  'не существует)', duplicates[int(number)]) 
+        else:
+            print ('Удаление фаила прошло успешно', duplicates[int(number)])
+
+
+def delete_files(number,duplicates):
+    try:
+        os.remove(duplicates[int(number)])
+        return True
+    except OSError:
+        return None
 
 
 def print_duplicates(duplicates):
@@ -83,23 +77,36 @@ def print_duplicates(duplicates):
         print(duplicate)
 
 
-def existance_of_folder(folder):
-    if not os.path.exists(folder):
-        print ('Папки не существует')
-        return None
-    else:
-        return (folder)
-
 if __name__ == '__main__':
-    load_win_unicode_console()
-    folder = read_arguments()
-    if folder is not None:
-        exist_folder = existance_of_folder(folder)
-        if exist_folder is not None:
-            duplicates_dictionary = create_duplicate_dictionary(folder)
-            if duplicates_dictionary is not None:
-                duplicates = find_duplicates(duplicates_dictionary)
-                print_duplicates(duplicates)
-                numbers = input_of_numbers()
-                if numbers is not None:
-                    delete_files(numbers,duplicates)
+    while True:
+        load_win_unicode_console()
+        
+        folder, parser = read_arguments()
+        if folder is None:
+            parser.print_help()
+            break
+        if not os.path.exists(folder):
+            print('Папки не существует')
+            break
+        
+        duplicates_dictionary = create_duplicate_dictionary(folder)
+        if duplicates_dictionary == {}:
+            print('Нет файлов в каталогах и подкаталогах')
+            break
+        
+        duplicates = find_duplicates(duplicates_dictionary)
+        if duplicates == []:
+            print('Дубликатов в данном каталоге,а также подкаталогах нет.')
+            break
+        print_duplicates(duplicates)
+
+        try:
+            numbers = input_of_numbers()
+        except ValueError:
+            print('Введены не числа\Не было введено ни одного числа')
+            break
+        except KeyboardInterrupt:
+            break
+        
+        print_delete_information(numbers,duplicates)
+        break
