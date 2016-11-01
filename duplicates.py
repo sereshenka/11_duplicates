@@ -73,8 +73,8 @@ def delete_files(number,duplicates):
 
 def print_duplicates(duplicates):
     print('Следующие фаилы явлются дубликатами:')
-    for duplicate in enumerate(duplicates):
-        print(duplicate)
+    for indx, duplicate in enumerate(duplicates):
+        print(indx+1,duplicate)
 
 
 if __name__ == '__main__':
