@@ -75,6 +75,7 @@ if __name__ == '__main__':
     while True:
         load_win_unicode_console()
         direction = input_direction()
+        
         if direction is None:
             break
         if not os.path.exists(direction):
