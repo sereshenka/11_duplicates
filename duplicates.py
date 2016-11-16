@@ -14,24 +14,18 @@ def load_win_unicode_console():
         win_unicode_console.enable()
 
 
-def read_arguments():
-    """
-    использую с join,чтобы программа работала при указании пути,в котором папка
-    может содержать в названии пробел.(C:\\Users\\New User\\file.format)
-    """
+def input_direction():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', help='Укажите путь к папке ', nargs = '+')
-    arguments = parser.parse_args().folder
-    try :
-        file_path = ' '.join(arguments)
-    except TypeError:
-        return None, parser
-    return file_path, parser
+    parser.add_argument('--folder', help='Укажите путь к папке ', nargs = '?')
+    direction = parser.parse_args().folder
+    if direction is None:
+        parser.print_help()
+    return direction
 
 
-def create_duplicate_dictionary(folder):
+def create_duplicate_dictionary(direction):
     duplicates_dictionary = defaultdict(list)
-    for directory, sub_dirs, files in os.walk(folder):
+    for directory, sub_dirs, files in os.walk(direction):
         for file_name in files:
             path = os.path.join(directory, file_name)
             size = os.path.getsize(path)
@@ -80,16 +74,14 @@ def print_duplicates(duplicates):
 if __name__ == '__main__':
     while True:
         load_win_unicode_console()
-        
-        folder, parser = read_arguments()
-        if folder is None:
-            parser.print_help()
+        direction = input_direction()
+        if direction is None:
             break
-        if not os.path.exists(folder):
+        if not os.path.exists(direction):
             print('Папки не существует')
             break
         
-        duplicates_dictionary = create_duplicate_dictionary(folder)
+        duplicates_dictionary = create_duplicate_dictionary(direction)
         if duplicates_dictionary == {}:
             print('Нет файлов в каталогах и подкаталогах')
             break
