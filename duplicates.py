@@ -16,8 +16,8 @@ def load_win_unicode_console():
 
 def input_direction():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', help='Укажите путь к папке ', nargs = '?')
-    direction = parser.parse_args().folder
+    parser.add_argument('--path', help='Укажите путь к папке ', nargs = '?')
+    direction = parser.parse_args().path
     if direction is None:
         parser.print_help()
     return direction
@@ -75,7 +75,6 @@ if __name__ == '__main__':
     while True:
         load_win_unicode_console()
         direction = input_direction()
-        
         if direction is None:
             break
         if not os.path.exists(direction):
