@@ -7,12 +7,6 @@ import argparse
 from collections import defaultdict
 
 
-def load_win_unicode_console():
-    if sys.platform == 'win32':
-        import win_unicode_console
-        win_unicode_console.enable()
-
-
 def input_direction():
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', help='Укажите путь к папке ', nargs = '?')
@@ -75,7 +69,6 @@ def print_duplicates(duplicates):
 
 if __name__ == '__main__':
     while True:
-        load_win_unicode_console()
         folder_path = input_direction()
         if folder_path is None:
             break
