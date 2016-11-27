@@ -89,17 +89,16 @@ def work_with_duplicates():
     duplicates_dictionary = create_duplicate_dictionary(folder_path)
     if duplicates_dictionary == {}:
         duplicates_errors.append('Нет файлов в каталогах и подкаталогах')
-        return False, duplicates_errors, None
+        return None, duplicates_errors
     
     duplicates = filter_duplicates(duplicates_dictionary)
     if duplicates == []:
         duplicates_errors.append('Дубликатов в данном каталоге,'
                                  'а также подкаталогах нет.')
-        return False, duplicates_errors, None
+        return None, duplicates_errors
     
     print_duplicates(duplicates)
-    return True, None, duplicates
-
+    return duplicates, None
 
 def get_integer_number(numbers):
     try:
@@ -116,8 +115,8 @@ if __name__ == '__main__':
         print(folder_errors)
         exit()
         
-    is_valid, duplicates_errors, duplicates = work_with_duplicates()
-    if not is_valid:
+    duplicates, duplicates_errors = work_with_duplicates()
+    if not duplicates:
         print(duplicates_errors)
         exit()
 
