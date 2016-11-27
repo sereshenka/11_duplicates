@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+
 import os
 import sys
 import argparse
@@ -15,10 +16,10 @@ def load_win_unicode_console():
 def input_direction():
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', help='Укажите путь к папке ', nargs = '?')
-    direction = parser.parse_args().path
-    if direction is None:
+    folder_path = parser.parse_args().path
+    if folder_path is None:
         parser.print_help()
-    return direction
+    return folder_path
 
 
 def create_duplicate_dictionary(direction):
@@ -43,46 +44,46 @@ def filter_duplicates(duplicates_dictionary):
 def input_of_numbers():
     numbers = input('Введите номера фаилов(через запятую),чтобы удалить их.'
                     'Чтобы выйти сочетание клавиш(ctrl+c)\n').split(',')
-    for number in numbers:
-        number = int(number)
     return numbers
    
 
-def print_succes_or_not_process_of_deleting_files(numbers,duplicates):
-    for number in numbers:
-        remove = delete_files(number,duplicates)
-        if remove is None:
+def print_delete_information(delete_error, duplicates):
+    if delete_error != []:
+        for number in delete_error:
             print('Ошибка в удалении файла(возможно его ' \
-                  'не существует)', duplicates[int(number)]) 
-        else:
-            print ('Удаление фаила прошло успешно', duplicates[int(number)])
+                    'не существует)', duplicates[number]) 
+    else:
+        print ('Удаление фаилов прошло успешно')
 
 
-def delete_files(number,duplicates):
-    try:
-        os.remove(duplicates[int(number)])
-        return True
-    except OSError:
-        return None
+def process_of_deleting_files(numbers, duplicates):
+    delete_error = []
+    for number in numbers:
+        number-=1
+        try:
+            os.remove(duplicates[number])
+        except OSError:
+            delete_error.append(number)
+    return  delete_error
 
 
 def print_duplicates(duplicates):
     print('Следующие фаилы явлются дубликатами:')
     for indx, duplicate in enumerate(duplicates):
-        print(indx+1,duplicate)
+        print(indx+1, duplicate)
 
 
 if __name__ == '__main__':
     while True:
         load_win_unicode_console()
-        direction = input_direction()
-        if direction is None:
+        folder_path = input_direction()
+        if folder_path is None:
             break
-        if not os.path.exists(direction):
+        if not os.path.exists(folder_path):
             print('Папки не существует')
             break
         
-        duplicates_dictionary = create_duplicate_dictionary(direction)
+        duplicates_dictionary = create_duplicate_dictionary(folder_path)
         if duplicates_dictionary == {}:
             print('Нет файлов в каталогах и подкаталогах')
             break
@@ -95,11 +96,14 @@ if __name__ == '__main__':
 
         try:
             numbers = input_of_numbers()
+        except KeyboardInterrupt:
+            break
+        try:
+            numbers = list(map(int, numbers))
         except ValueError:
             print('Введены не числа\Не было введено ни одного числа')
             break
-        except KeyboardInterrupt:
-            break
         
-        print_succes_or_not_process_of_deleting_files(numbers,duplicates)
+        delete_error = process_of_deleting_files(numbers, duplicates)       
+        print_delete_information(delete_error, duplicates)
         break
