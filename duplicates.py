@@ -1,6 +1,4 @@
 #!/usr/bin/python
-#-*- coding: utf-8 -*-
-
 
 import os
 import sys
@@ -33,9 +31,12 @@ def create_duplicate_dictionary(direction):
     return duplicates_dictionary
 
                             
-def find_duplicates(duplicates_dictionary):
-    duplicates_dictionary = list(filter(lambda x: len(x) > 1,duplicates_dictionary.values()))
-    duplicates = [duplicate for duplicates in duplicates_dictionary for duplicate in duplicates]
+def filter_duplicates(duplicates_dictionary):
+    duplicates_dictionary_with_lenght_over_1 = list(filter(lambda x: \
+                            len(x) > 1,duplicates_dictionary.values()))
+    duplicates = [duplicate for duplicate_dictionary in \
+                  duplicates_dictionary_with_lenght_over_1 \
+                  for duplicate in duplicate_dictionary]
     return duplicates
 
 
@@ -43,11 +44,11 @@ def input_of_numbers():
     numbers = input('Введите номера фаилов(через запятую),чтобы удалить их.'
                     'Чтобы выйти сочетание клавиш(ctrl+c)\n').split(',')
     for number in numbers:
-        int(number)
+        number = int(number)
     return numbers
    
 
-def print_delete_information(numbers,duplicates):
+def print_succes_or_not_process_of_deleting_files(numbers,duplicates):
     for number in numbers:
         remove = delete_files(number,duplicates)
         if remove is None:
@@ -86,7 +87,7 @@ if __name__ == '__main__':
             print('Нет файлов в каталогах и подкаталогах')
             break
         
-        duplicates = find_duplicates(duplicates_dictionary)
+        duplicates = filter_duplicates(duplicates_dictionary)
         if duplicates == []:
             print('Дубликатов в данном каталоге,а также подкаталогах нет.')
             break
@@ -100,5 +101,5 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             break
         
-        print_delete_information(numbers,duplicates)
+        print_succes_or_not_process_of_deleting_files(numbers,duplicates)
         break
