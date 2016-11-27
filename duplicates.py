@@ -36,8 +36,13 @@ def filter_duplicates(duplicates_dictionary):
 
 
 def input_of_numbers():
-    numbers = input('Введите номера фаилов(через запятую),чтобы удалить их.'
-                    'Чтобы выйти сочетание клавиш(ctrl+c)\n').split(',')
+    try:
+        numbers = input('Введите номера фаилов(через запятую),чтобы удалить их.'
+                        'Чтобы выйти сочетание клавиш(ctrl+c)\n').split(',')
+    except KeyboardInterrupt:
+        return None
+    except EOFError:
+        return None
     return numbers
    
 
@@ -50,9 +55,9 @@ def print_delete_information(delete_error, duplicates):
         print ('Удаление фаилов прошло успешно')
 
 
-def process_of_deleting_files(numbers, duplicates):
+def process_of_deleting_files(integer_numbers, duplicates):
     delete_error = []
-    for number in numbers:
+    for number in integer_numbers:
         number-=1
         try:
             os.remove(duplicates[number])
@@ -67,36 +72,62 @@ def print_duplicates(duplicates):
         print(indx+1, duplicate)
 
 
-if __name__ == '__main__':
-    while True:
-        folder_path = input_direction()
-        if folder_path is None:
-            break
-        if not os.path.exists(folder_path):
-            print('Папки не существует')
-            break
-        
-        duplicates_dictionary = create_duplicate_dictionary(folder_path)
-        if duplicates_dictionary == {}:
-            print('Нет файлов в каталогах и подкаталогах')
-            break
-        
-        duplicates = filter_duplicates(duplicates_dictionary)
-        if duplicates == []:
-            print('Дубликатов в данном каталоге,а также подкаталогах нет.')
-            break
-        print_duplicates(duplicates)
+def is_folder_path_valid(folder_path):
+    folder_errors = []
+    if folder_path is None:
+        folder_errors.append('Не введен путь')
+        return False, folder_errors
+    if not os.path.exists(folder_path):
+        folder_errors.append('Папки не существует')
+        return False, folder_errors
+    return True, folder_errors
 
-        try:
-            numbers = input_of_numbers()
-        except KeyboardInterrupt:
-            break
-        try:
-            numbers = list(map(int, numbers))
-        except ValueError:
-            print('Введены не числа\Не было введено ни одного числа')
-            break
+
+def work_with_duplicates():
+    duplicates_errors = []
+    
+    duplicates_dictionary = create_duplicate_dictionary(folder_path)
+    if duplicates_dictionary == {}:
+        duplicates_errors.append('Нет файлов в каталогах и подкаталогах')
+        return False, duplicates_errors, None
+    
+    duplicates = filter_duplicates(duplicates_dictionary)
+    if duplicates == []:
+        duplicates_errors.append('Дубликатов в данном каталоге,'
+                                 'а также подкаталогах нет.')
+        return False, duplicates_errors, None
+    
+    print_duplicates(duplicates)
+    return True, None, duplicates
+
+
+def get_integer_number(numbers):
+    try:
+        integer_numbers = list(map(int, numbers))
+    except ValueError:
+        return None
+    return integer_numbers
+
+    
+if __name__ == '__main__':
+    folder_path = input_direction()
+    is_valid, folder_errors = is_folder_path_valid(folder_path)
+    if not is_valid:
+        print(folder_errors)
+        exit()
         
-        delete_error = process_of_deleting_files(numbers, duplicates)       
-        print_delete_information(delete_error, duplicates)
-        break
+    is_valid, duplicates_errors, duplicates = work_with_duplicates()
+    if not is_valid:
+        print(duplicates_errors)
+        exit()
+
+    numbers = input_of_numbers()
+    if numbers is None:
+        exit()
+    integer_numbers = get_integer_number(numbers)
+    if integer_numbers is None:
+        print('Введены не числа\Не было введено ни одного числа')
+        exit()
+        
+    delete_error = process_of_deleting_files(integer_numbers, duplicates)       
+    print_delete_information(delete_error, duplicates)
